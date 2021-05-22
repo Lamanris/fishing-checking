@@ -1,0 +1,26 @@
+{
+  "name": "fishingChecking",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "api": "cd api && nodemon server.js",
+    "dev": "concurrently --kill-others-on-fail \"npm run api\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lamanris/fishing-checking.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Lamanris/fishing-checking/issues"
+  },
+  "homepage": "https://github.com/Lamanris/fishing-checking#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "mongoose": "^5.12.10"
+  }
+}

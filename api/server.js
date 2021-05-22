@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import path from 'path'
 import {connectionDB} from "./mongoose/db.js"
 import Sites from "./models/Sites.model.js"
 
@@ -8,6 +9,8 @@ connectionDB()
 
 server.use(cors())
 server.use(express.json())
+
+server.use(express.static(path.join(__dirname, '../frontend')))
 
 server.post('/api/v1/find-site', async (req, res) => {
     const { value } = req.body
@@ -37,6 +40,10 @@ server.post('/api/v1/add-site', async (req, res) => {
             message: 'Сохранение успешно. Спасибо!'
         })
     })
+})
+
+server.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname + '/../frontend/index.html'))
 })
 
 server.listen(3000, () => {
