@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>fishing checking</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+<div class="wrapper">
+    <h1 class="title">Проверка писем и ссылок на фишинг атаки</h1>
+    <div class="content">
+        <div class="buttons">
+            <button type="button" class="btn btn-check-message active">Перевірка листа</button>
+            <button type="button" class="btn btn-check-link">Перевірка посилання</button>
+        </div>
+        <form class="form form-message active">
+            <input
+                    type="text"
+                    name="email"
+                    placeholder="Электронная почта"
+                    required
+                    class="form__input"
+            />
+            <textarea
+                    name="message"
+                    placeholder="Содержание письма"
+                    rows="10"
+                    required
+                    class="form__input"
+            ></textarea>
+            <button
+                    type="submit"
+                    class="form__btn">Проверить</button>
+        </form>
+        <form class="form form-link">
+            <input
+                    type="text"
+                    name="link"
+                    placeholder="Ссылка"
+                    required
+                    class="form__input"
+            />
+            <button
+                    type="submit"
+                    class="form__btn">Проверить</button>
+        </form>
+    </div>
+</div>
+
+<div class="loader">
+    <div class="lds-dual-ring"></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>
