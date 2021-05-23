@@ -50,7 +50,12 @@ server.post('/api/v1/add-site', async (req, res) => {
 
 server.post('/api/v1/check-redirect', async (req, res) => {
     const { link } = req.body
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+        ],
+    });
     const page = await browser.newPage();
     await page.goto(link);
     const url = await page. url();
