@@ -12,7 +12,11 @@ server.use(cors())
 server.use(express.json())
 
 const __dirname = path.resolve();
-server.use('/api', express.static(__dirname +'../frontend'))
+server.use(express.static(path.join(__dirname, 'frontend')));
+
+server.get('/*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+});
 
 server.post('/api/v1/find-site', async (req, res) => {
     const { value } = req.body
