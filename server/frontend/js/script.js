@@ -174,7 +174,7 @@ async function subdomainsQuantities (link, error) {
     return error
 }
 async function fishingDbSites (link, error) {
-    await axios.post('http://localhost:3000/api/v1/find-site', {value: link})
+    await axios.post('https://fishing-checking.herokuapp.com/api/v1/find-site', {value: link})
         .then((res) => {
             if (res.data) {
                 error++
@@ -187,7 +187,7 @@ async function fishingDbSites (link, error) {
     return error
 }
 async function checkRedirect (link, error) {
-    await axios.post('http://localhost:3000/api/v1/check-redirect', {link: link})
+    await axios.post('https://fishing-checking.herokuapp.com/api/v1/check-redirect', {link: link})
         .then((res) => {
             const redirectedDomain = (res.data.slice(res.data.indexOf('://') + 3)).split('/')[0]
             const linkDomain = (link.slice(link.indexOf('://') + 3)).split('/')[0]
@@ -210,11 +210,11 @@ function linkValidateConclusion (link, error) {
     } else if (error > 1 || link.includes('http://') || link.match(/[0-9]+[0-9]+[0-9]+[.]+[0-9]/)) {
         loader.classList.remove('_loading')
         alert("Даний лист є фішинговим! Перемістіть його в папку спам")
-        axios.post('http://localhost:3000/api/v1/find-site', {value: link})
+        axios.post('https://fishing-checking.herokuapp.com/api/v1/find-site', {value: link})
             .then((res) => {
                 if (!res.data) {
                     if (confirm("Добавить сайт в базу данных фишинг-сайтов?")) {
-                        axios.post('http://localhost:3000/api/v1/add-site', {value: link})
+                        axios.post('https://fishing-checking.herokuapp.com/api/v1/add-site', {value: link})
                             .then((res) => {
                                 console.log(res.data.message)
                                 alert(res.data.message)
