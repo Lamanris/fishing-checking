@@ -202,7 +202,6 @@ async function checkRedirect (link, error) {
     return error
 }
 
-
 function linkValidateConclusion (link, error) {
     if (error === 1) {
         loader.classList.remove('_loading')
