@@ -60,6 +60,6 @@ server.post('/api/v1/check-redirect', async (req, res) => {
     res.json(url)
 })
 
-server.listen(3000, () => {
+server.listen(process.env.PORT || 3000, () => {
     console.log('Server is started')
 })
