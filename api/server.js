@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import puppeteer from 'puppeteer'
-// import path from 'path'
+import path from 'path'
 import {connectionDB} from "./mongoose/db.js"
 import Sites from "./models/Sites.model.js"
 
@@ -11,7 +11,8 @@ connectionDB()
 server.use(cors())
 server.use(express.json())
 
-// server.use(express.static(path.join(__dirname, '../frontend')))
+const __dirname = path.resolve();
+server.use('/api', express.static(__dirname +'../frontend'))
 
 server.post('/api/v1/find-site', async (req, res) => {
     const { value } = req.body
@@ -54,10 +55,6 @@ server.post('/api/v1/check-redirect', async (req, res) => {
     await browser.close();
     res.json(url)
 })
-
-// server.get('*', (req, res) => {
-//     res.sendFile(path.join(__dirname + '/../frontend/index.html'))
-// })
 
 server.listen(3000, () => {
     console.log('Server is started')
