@@ -117,6 +117,7 @@ async function linkValidation (link, error) {
     }
     error = await fishingDbSites(link, error)
     error = await subdomainsQuantities(link, error)
+    error = await checkRedirect(link, error)
     return error
 }
 
@@ -178,6 +179,21 @@ async function fishingDbSites (link, error) {
             if (res.data) {
                 error++
                 console.log('The link is in the fishing database')
+            }
+        })
+        .catch((err) => {
+            console.log(err)
+        })
+    return error
+}
+async function checkRedirect (link, error) {
+    await axios.post('http://localhost:3000/api/v1/check-redirect', {link: link})
+        .then((res) => {
+            const redirectedDomain = (res.data.slice(res.data.indexOf('://') + 3)).split('/')[0]
+            const linkDomain = (link.slice(link.indexOf('://') + 3)).split('/')[0]
+            if (!redirectedDomain.includes(linkDomain)) {
+                error++
+                console.log('The link is redirecting to another page')
             }
         })
         .catch((err) => {
