@@ -1,12 +1,12 @@
 {
-  "name": "fishingChecking",
+  "name": "fishing-checking",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "api": "cd api && nodemon server.js",
+    "api": "cd server && nodemon server.js",
     "dev": "concurrently --kill-others-on-fail \"npm run api\"",
-    "start": "cd api && node server.js"
+    "start": "cd server && node server.js"
   },
   "repository": {
     "type": "git",
