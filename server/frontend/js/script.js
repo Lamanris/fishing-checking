@@ -31,18 +31,17 @@ defaultForm.forEach(el => {
     })
 })
 
-const banWords = ['последнее предупреждение', 'срочная проверка', 'быстрое блокирование', 'немедленно', 'останнє попередження', 'термінова перевірка', 'швидке блокування', 'негайно']
+const banWords = ['последнее предупреждение', 'срочная проверка', 'быстрое блокирование', 'немедленно', 'останнє попередження', 'термінова перевірка', 'швидке блокування', 'негайно', 'користувач', 'клієнт', 'пользователь', 'клиент', 'Дорогой клиент', 'уважаемый']
 
 async function validation (data) {
     if (data.message) {
         loader.classList.add('_loading')
         let error = await messageValidation(data.message)
-        error = await domainValidation(data.email, error)
-        let banWordsTimes = banWords.map(el => data.message.includes(el))
+        console.log(error)
         if (error === 1) {
             loader.classList.remove('_loading')
             alert("Обережно! Даний контент не є безпечним")
-        } else if (error > 1 || banWordsTimes.includes(true)) {
+        } else if (error > 1) {
             loader.classList.remove('_loading')
             alert("Даний лист є фішинговим! Перемістіть його в папку спам")
         } else {
@@ -60,7 +59,13 @@ async function validation (data) {
                     }
                 }
                 error = await linkValidation(link, error)
-                linkValidateConclusion(link, error)
+                console.log(error)
+                if (error === 'Нерабочая ссылка') {
+                    loader.classList.remove('_loading')
+                    alert('Нерабочая ссылка')
+                } else {
+                    linkValidateConclusion(data.link, error)
+                }
             } else {
                 loader.classList.remove('_loading')
                 alert("Лист безпечний!")
@@ -76,14 +81,19 @@ async function validation (data) {
             let error = 0
             error = await linkValidation(data.link, error)
             console.log(error)
-            linkValidateConclusion(data.link, error)
+            if (error === 'Нерабочая ссылка') {
+                loader.classList.remove('_loading')
+                alert('Нерабочая ссылка')
+            } else {
+                linkValidateConclusion(data.link, error)
+            }
         }
     }
 }
 
 async function messageValidation (message) {
     let error = 0
-    let banWordsTimes = banWords.map(el => message.includes(el))
+    let banWordsTimes = banWords.map(el => message.toLowerCase().includes(el.toLowerCase()))
     if (banWordsTimes.includes(true)) {
         error++
         console.log('Письмо содержит подозрительные слова')
@@ -92,7 +102,12 @@ async function messageValidation (message) {
         error++
         console.log('Письмо содержит больше одного - !')
     }
+    error = await grammarValidation(message, error)
+    error = await greetingValidation(message, error)
+    return error
+}
 
+async function grammarValidation (message, error) {
     const joinedMessage = message.replace(/ /g, '+')
     await axios.get(`https://speller.yandex.net/services/spellservice.json/checkText?text=${joinedMessage}&lang=uk,ru&options=6`)
         .then((res) => {
@@ -106,24 +121,52 @@ async function messageValidation (message) {
         })
     return error
 }
+function greetingValidation (message, error) {
+    const greets = ['Доброго дня', 'Вітаю', 'Шановний', 'Здравствуй', 'Здравствуйте', 'Доброго времени суток', 'Уважаемый', 'Добрий день', 'Доброго ранку!', 'Добривечір!', 'Дорогой']
+    const lowMessage = message.toLowerCase()
+    greets.forEach(el => {
+        const lowWord = el.toLowerCase()
+        if (lowMessage.includes(lowWord)) {
+            let startIndex = lowMessage.indexOf(lowWord)
+            let slicedContext = message.slice(startIndex, startIndex + lowWord.length + 3)
+            if (slicedContext[slicedContext.length - 3] === ',') {
+                if (slicedContext[slicedContext.length - 2] === ' ') {
+                    if (slicedContext[slicedContext.length - 1] !== slicedContext[slicedContext.length - 1].toUpperCase()) {
+                        error++
+                        console.log('После обращения, слово начинается с маленькой буквы')
+                    }
+                } else {
+                    if (slicedContext[slicedContext.length - 2] !== slicedContext[slicedContext.length - 2].toUpperCase()) {
+                        error++
+                        console.log('После обращения, слово начинается с маленькой буквы')
+                    }
+                }
+            }
+        }
+    })
+    return error
+}
+
 async function linkValidation (link, error) {
     if (link.match(/[0-9]+[0-9]+[0-9]+[.]+[0-9]/) || link.match(/[0-9]+[0-9]+[.]/)) {
         error++
-        console.log('Ссылка сожержить ip адрес')
+        console.log('Ссылка содержит ip адрес')
     }
     if (!link.includes('https')) {
         error++
         console.log('Ссылка не https')
     }
     error = await fishingDbSites(link, error)
+    error = await domainValidation(link, error)
     error = await subdomainsQuantities(link, error)
     error = await checkRedirect(link, error)
     return error
 }
 
-const apiKey = "at_YkkytHcD5l6M0mJeb0nzlcxyp8i56";
-async function domainValidation (email, error) {
-    const domain = email.slice(email.indexOf('@') + 1)
+const apiKey = "at_gyFzrALICXpppEpQaRLKMVho24pws";
+async function domainValidation (link, error) {
+    const linkDomain = link.slice(link.indexOf('://') + 3)
+    const domain = linkDomain.split('/')[0]
     const url = 'https://www.whoisxmlapi.com/whoisserver/WhoisService?';
     let result
     try {
@@ -195,7 +238,7 @@ async function checkRedirect (link, error) {
         await axios.post('https://fishing-checking.herokuapp.com/api/v1/check-redirect', {link: link})
             .then((res) => {
                 if (res.data === 'The link is invalid') {
-                    console.log('The link is invalid')
+                    error = 'Нерабочая ссылка'
                 } else {
                     const redirectedDomain = (res.data.slice(res.data.indexOf('://') + 3)).split('/')[0]
                     const linkDomain = (link.slice(link.indexOf('://') + 3)).split('/')[0]
@@ -214,11 +257,13 @@ async function checkRedirect (link, error) {
     return error
 }
 
-function linkValidateConclusion (link, error) {
+async function linkValidateConclusion (link, error) {
+    let subdomainsErrors = 0
+    subdomainsErrors = await subdomainsQuantities(link, subdomainsErrors)
     if (error === 1) {
         loader.classList.remove('_loading')
         alert("Обережно! Даний сайт не є безпечним!")
-    } else if (error > 1 || link.includes('http://') || link.match(/[0-9]+[0-9]+[0-9]+[.]+[0-9]/)) {
+    } else if (error > 1 || link.includes('http://') || link.match(/[0-9]+[0-9]+[0-9]+[.]+[0-9]/) || subdomainsErrors === 1) {
         loader.classList.remove('_loading')
         alert("Обережно! Даний сайт не є безпечним, Даний сайт є фішинговим! Перехід за посиланням є небезпечним.")
         axios.post('https://fishing-checking.herokuapp.com/api/v1/find-site', {value: link})
