@@ -57,7 +57,11 @@ server.post('/api/v1/check-redirect', async (req, res) => {
         ],
     });
     const page = await browser.newPage();
-    await page.goto(link);
+    try {
+        await page.goto(link)
+    } catch (e) {
+        res.json('The link is invalid')
+    }
     const url = await page. url();
     console.log("Link:", link)
     console. log("Redirected URL:", url);

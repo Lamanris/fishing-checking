@@ -63,7 +63,7 @@ async function validation (data) {
                 linkValidateConclusion(link, error)
             } else {
                 loader.classList.remove('_loading')
-                alert("Письмо безопасно!")
+                alert("Лист безпечний!")
             }
         }
     }
@@ -109,11 +109,11 @@ async function messageValidation (message) {
 async function linkValidation (link, error) {
     if (link.match(/[0-9]+[0-9]+[0-9]+[.]+[0-9]/) || link.match(/[0-9]+[0-9]+[.]/)) {
         error++
-        console.log('The link contains ip address')
+        console.log('Ссылка сожержить ip адрес')
     }
     if (!link.includes('https')) {
         error++
-        console.log('The link is not https')
+        console.log('Ссылка не https')
     }
     error = await fishingDbSites(link, error)
     error = await subdomainsQuantities(link, error)
@@ -143,7 +143,7 @@ async function domainValidation (email, error) {
         const lastMonth =  new Date().getTime() - 2629743000
         if (creationDate > lastMonth) {
             error++
-            console.log('The domain of sender was created recently')
+            console.log('Домен отправителя был создан меньше чем месяц назад')
         }
         return error
     } catch (error) {
@@ -166,49 +166,61 @@ async function subdomainsQuantities (link, error) {
         });
         if (result.result.count > 3) {
             error++
-            console.log('The domain of link has more than 3 subdomains')
+            console.log('Домен ссылки имеет больше 3 поддоменов')
         }
     } catch (error) {
-        console.error(error)
+        console.log(error)
     }
     return error
 }
 async function fishingDbSites (link, error) {
-    await axios.post('https://fishing-checking.herokuapp.com/api/v1/find-site', {value: link})
-        .then((res) => {
-            if (res.data) {
-                error++
-                console.log('The link is in the fishing database')
-            }
-        })
-        .catch((err) => {
-            console.log(err)
-        })
+    try {
+        await axios.post('https://fishing-checking.herokuapp.com/api/v1/find-site', {value: link})
+            .then((res) => {
+                if (res.data) {
+                    error++
+                    console.log('Ссылка находится в фишинговый базе данных')
+                }
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+    } catch (error) {
+        console.log(error)
+    }
     return error
 }
 async function checkRedirect (link, error) {
-    await axios.post('https://fishing-checking.herokuapp.com/api/v1/check-redirect', {link: link})
-        .then((res) => {
-            const redirectedDomain = (res.data.slice(res.data.indexOf('://') + 3)).split('/')[0]
-            const linkDomain = (link.slice(link.indexOf('://') + 3)).split('/')[0]
-            if (!redirectedDomain.includes(linkDomain)) {
-                error++
-                console.log('The link is redirecting to another page')
-            }
-        })
-        .catch((err) => {
-            console.log(err)
-        })
+    try {
+        await axios.post('https://fishing-checking.herokuapp.com/api/v1/check-redirect', {link: link})
+            .then((res) => {
+                if (res.data === 'The link is invalid') {
+                    console.log('The link is invalid')
+                } else {
+                    const redirectedDomain = (res.data.slice(res.data.indexOf('://') + 3)).split('/')[0]
+                    const linkDomain = (link.slice(link.indexOf('://') + 3)).split('/')[0]
+                    if (!redirectedDomain.includes(linkDomain)) {
+                        error++
+                        console.log('Ссылка переносит на другой сайт')
+                    }
+                }
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+    } catch (error) {
+        console.log(error)
+    }
     return error
 }
 
 function linkValidateConclusion (link, error) {
     if (error === 1) {
         loader.classList.remove('_loading')
-        alert("Обережно! Даний контент не є безпечним")
+        alert("Обережно! Даний сайт не є безпечним!")
     } else if (error > 1 || link.includes('http://') || link.match(/[0-9]+[0-9]+[0-9]+[.]+[0-9]/)) {
         loader.classList.remove('_loading')
-        alert("Даний лист є фішинговим! Перемістіть його в папку спам")
+        alert("Обережно! Даний сайт не є безпечним, Даний сайт є фішинговим! Перехід за посиланням є небезпечним.")
         axios.post('https://fishing-checking.herokuapp.com/api/v1/find-site', {value: link})
             .then((res) => {
                 if (!res.data) {
@@ -231,6 +243,6 @@ function linkValidateConclusion (link, error) {
             })
     } else {
         loader.classList.remove('_loading')
-        alert("Письмо безопасно!")
+        alert("Посилання безпечне!")
     }
 }
