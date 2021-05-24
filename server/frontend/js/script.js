@@ -38,12 +38,13 @@ async function validation (data) {
         loader.classList.add('_loading')
         let error = await messageValidation(data.message)
         console.log(error)
-        if (error === 1) {
-            loader.classList.remove('_loading')
-            alert("Обережно! Даний контент не є безпечним")
-        } else if (error > 1) {
+        let banWordsTimes = banWords.map(el => data.message.toLowerCase().includes(el.toLowerCase()))
+        if (error > 1 || banWordsTimes.includes(true)) {
             loader.classList.remove('_loading')
             alert("Даний лист є фішинговим! Перемістіть його в папку спам")
+        } else if (error === 1) {
+            loader.classList.remove('_loading')
+            alert("Обережно! Даний контент не є безпечним")
         } else {
             if(data.message.includes('https://') || data.message.includes('http://')) {
                 let link
