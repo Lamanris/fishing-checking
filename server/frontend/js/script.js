@@ -270,7 +270,7 @@ async function linkValidateConclusion (link, error) {
         axios.post('https://fishing-checking.herokuapp.com/api/v1/find-site', {value: link})
             .then((res) => {
                 if (!res.data) {
-                    if (confirm("Добавить сайт в базу данных фишинг-сайтов?")) {
+                    if (confirm("Додати посилання в базу даних фішингових сайтів?")) {
                         axios.post('https://fishing-checking.herokuapp.com/api/v1/add-site', {value: link})
                             .then((res) => {
                                 console.log(res.data.message)
@@ -280,7 +280,7 @@ async function linkValidateConclusion (link, error) {
                                 console.log(err)
                             })
                     } else {
-                        console.log('Вы отменили добавление!')
+                        console.log('Ви відмінили додавання!')
                     }
                 }
             })

@@ -43,7 +43,7 @@ server.post('/api/v1/add-site', async (req, res) => {
         }
         console.log('Сохранение успешно. Спасибо!')
         return res.json({
-            message: 'Сохранение успешно. Спасибо!'
+            message: 'Збереження успішно. Дякую!'
         })
     })
 })
